@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NUV ACM Events Admin</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0b0f;
+        --card: #14141b;
+        --accent: #dc2626;
+        --muted: #9ca3af;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 20% 20%, rgba(220, 38, 38, 0.08), transparent 35%),
+          radial-gradient(circle at 80% 0%, rgba(220, 38, 38, 0.12), transparent 30%),
+          var(--bg);
+        color: #fff;
+        min-height: 100vh;
+      }
+      .shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      h1 {
+        margin: 0 0 12px;
+      }
+      p {
+        color: var(--muted);
+        margin: 0 0 18px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+      .card + .card {
+        margin-top: 18px;
+      }
+      label {
+        display: block;
+        margin: 12px 0 6px;
+        font-weight: 600;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        background: #0f0f16;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: #fff;
+        font-size: 14px;
+      }
+      textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+      .row {
+        display: grid;
+        gap: 12px;
+      }
+      @media (min-width: 720px) {
+        .row.two {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      button {
+        background: linear-gradient(135deg, #f43f5e, #dc2626);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 14px;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: #374151;
+      }
+      .events {
+        margin-top: 28px;
+        display: grid;
+        gap: 14px;
+      }
+      .event-item {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px;
+        background: #0f0f16;
+        display: grid;
+        gap: 6px;
+      }
+      .event-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .danger {
+        background: #ef4444;
+      }
+      small {
+        color: var(--muted);
+      }
+      .preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .preview img {
+        width: 96px;
+        height: 96px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .err {
+        color: #f87171;
+        font-size: 13px;
+      }
+      .ok {
+        color: #34d399;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <h1>Events Admin</h1>
+      <p>Add or delete events.Aim for ~400-600px width for best card fit.</p>
+
+      <div class="card">
+        <form id="event-form">
+          <label>Heading *</label>
+          <input id="heading" required />
+
+          <label>Description *</label>
+          <textarea id="description" required placeholder="Plain text; line breaks kept."></textarea>
+
+          <div class="row two">
+            <div>
+              <label>Date (YYYY-MM-DD)</label>
+              <input id="date" placeholder="2025-02-07" />
+            </div>
+            <div>
+              <label>Reverse Layout?</label>
+              <select id="reverse">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row two">
+            <div>
+              <label>Form Link</label>
+              <input id="formLink" placeholder="https://..." />
+            </div>
+            <div>
+              <label>QR Link</label>
+              <input id="qrLink" placeholder="https://..." />
+            </div>
+          </div>
+
+          <label>Images (multiple allowed)</label>
+          <input id="images" type="file" multiple accept="image/*" />
+          <small>Recommended: crop/rescale near 400-600px wide to keep cards uniform.</small>
+          <div class="preview" id="preview"></div>
+
+          <button type="submit">Add Event</button>
+          <span id="status" class="muted" style="margin-left:8px;"></span>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="event-head" style="margin-bottom:10px;">
+          <div>
+            <strong>Existing Events</strong>
+            <div class="muted">Click delete to remove; newly added items appear here.</div>
+          </div>
+          <button id="refresh" class="btn-secondary" type="button">Refresh</button>
+        </div>
+        <div class="events" id="events"></div>
+      </div>
+    </div>
+
+    <script src="/admin-assets/admin.js"></script>
+  </body>
+</html>

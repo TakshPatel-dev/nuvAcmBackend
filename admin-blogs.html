@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blogs Admin</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.05), transparent 25%),
+          radial-gradient(circle at 80% 0%, rgba(248, 113, 113, 0.06), transparent 22%),
+          #0b0b0f;
+        color: #e5e7eb;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      .shell {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .card {
+        background: rgba(17, 17, 23, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        padding: 20px;
+        backdrop-filter: blur(10px);
+      }
+      .header {
+        margin-bottom: 16px;
+      }
+      h1 {
+        margin: 0 0 6px 0;
+        font-size: 28px;
+        color: #f8fafc;
+      }
+      .sub {
+        margin: 0;
+        color: #9ca3af;
+      }
+      form {
+        display: grid;
+        gap: 12px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #e5e7eb;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        color: #f8fafc;
+        font-size: 14px;
+      }
+      textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      button {
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      }
+      .primary {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.35);
+      }
+      .ghost {
+        background: rgba(255, 255, 255, 0.05);
+        color: #e5e7eb;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      button:hover {
+        transform: translateY(-1px);
+        opacity: 0.95;
+      }
+      .list {
+        margin-top: 18px;
+        display: grid;
+        gap: 10px;
+      }
+      .item {
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 14px;
+        background: rgba(15, 15, 20, 0.8);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .item-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .tag {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fecdd3;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .muted {
+        color: #9ca3af;
+        font-size: 13px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .status {
+        margin-top: 10px;
+        font-size: 14px;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 16px;
+        }
+        .item-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div className="shell">
+      <div className="card header">
+        <h1>Blogs Admin</h1>
+        <p className="sub">
+          Add or delete blog posts.
+        </p>
+      </div>
+
+      <div className="card">
+        <form id="blog-form">
+          <div>
+            <label for="title">Title *</label>
+            <input id="title" name="title" placeholder="Post title" required />
+          </div>
+          <div className="row">
+            <div>
+              <label for="tag">Tag</label>
+              <input id="tag" name="tag" placeholder="Category / Tag (e.g., Dev Notes)" />
+            </div>
+            <div>
+              <label for="date">Date</label>
+              <input id="date" name="date" placeholder="2025-02-07" />
+            </div>
+            <div>
+              <label for="readTime">Read Time</label>
+              <input id="readTime" name="readTime" placeholder="5 min read" />
+            </div>
+          </div>
+          <div>
+            <label for="excerpt">Excerpt *</label>
+            <textarea id="excerpt" name="excerpt" placeholder="Short summary" required></textarea>
+          </div>
+          <div>
+            <label for="image">Hero Image</label>
+            <input type="file" id="image" name="image" accept="image/*" />
+            <div id="image-preview" style="margin-top: 8px;"></div>
+          </div>
+          <div>
+            <label for="content">Long Content (optional)</label>
+            <textarea id="content" name="content" placeholder="Optional rich text / markdown"></textarea>
+          </div>
+          <button type="submit" className="primary" id="save-btn">Add Blog</button>
+          <div id="status" className="status"></div>
+        </form>
+      </div>
+
+      <div className="card" style="margin-top: 18px">
+        <div className="item-head" style="margin-bottom: 10px">
+          <h2 style="margin: 0; font-size: 20px">Existing Blogs</h2>
+          <button id="refresh" className="ghost" type="button">Refresh</button>
+        </div>
+        <div id="blog-list" className="list"></div>
+      </div>
+    </div>
+
+    <script src="/admin-assets/blog-admin.js?v=2" defer></script>
+  </body>
+</html>
+
