@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NUV ACM - Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'aleo': ['Aleo', 'serif'],
+            },
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      // Check if user is already logged in
+      const token = localStorage.getItem('admin_token');
+      if (token) {
+        // Redirect to events admin if already logged in
+        window.location.href = '/admin';
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Logo and Header -->
+      <div class="text-center">
+        <div class="flex justify-center">
+          <img src="/public/nuvLogo.png" alt="NUV ACM" class="h-16 w-auto">
+        </div>
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900 font-aleo">
+          NUV ACM Admin
+        </h2>
+        <p class="mt-2 text-sm text-gray-600">
+          Sign in to access the admin panel
+        </p>
+      </div>
+
+      <!-- Login Form -->
+      <div class="bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-200">
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                placeholder="Enter your username"
+                class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                placeholder="Enter your password"
+                class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+              />
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              id="login-btn"
+              class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+            >
+              <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                <svg id="login-spinner" class="hidden h-5 w-5 text-red-400 group-hover:text-red-300" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+              Sign in to Admin Panel
+            </button>
+          </div>
+
+          <div id="status" class="text-center"></div>
+        </form>
+
+        <!-- Demo Credentials -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-blue-800">Demo Credentials</h3>
+              <div class="mt-2 text-sm text-blue-700">
+                <p><strong>Username:</strong> admin</p>
+                <p><strong>Password:</strong> nuvacm2025</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // API endpoint - adjust this if backend is on different port
+      const API = 'http://localhost:4000';
+      const loginForm = document.getElementById('login-form');
+      const loginBtn = document.getElementById('login-btn');
+      const loginSpinner = document.getElementById('login-spinner');
+      const statusEl = document.getElementById('status');
+
+      const setStatus = (msg, type = 'info') => {
+        statusEl.className = 'text-sm mt-4';
+        if (type === 'success') {
+          statusEl.className += ' text-green-600';
+          statusEl.innerHTML = `✓ ${msg}`;
+        } else if (type === 'error') {
+          statusEl.className += ' text-red-600';
+          statusEl.innerHTML = `✕ ${msg}`;
+        } else if (type === 'loading') {
+          statusEl.className += ' text-blue-600';
+          statusEl.innerHTML = `<div class="inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>${msg}`;
+        } else {
+          statusEl.className += ' text-gray-600';
+          statusEl.textContent = msg;
+        }
+      };
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(loginForm);
+        const credentials = {
+          username: formData.get('username').trim(),
+          password: formData.get('password')
+        };
+
+        if (!credentials.username || !credentials.password) {
+          setStatus('Please enter both username and password', 'error');
+          return;
+        }
+
+        // Show loading state
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = `
+          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <svg class="h-5 w-5 text-red-400 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+          Signing in...
+        `;
+
+        try {
+          const response = await fetch(`${API}/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(credentials)
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.token) {
+            // Store token and redirect
+            localStorage.setItem('admin_token', data.token);
+            setStatus('Login successful! Redirecting...', 'success');
+
+            setTimeout(() => {
+              window.location.href = '/admin';
+            }, 1000);
+          } else {
+            throw new Error(data.message || 'Login failed');
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          setStatus(error.message || 'Login failed. Please try again.', 'error');
+
+          // Reset button
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = 'Sign in to Admin Panel';
+        }
+      });
+    </script>
+  </body>
+</html>

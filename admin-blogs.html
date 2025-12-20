@@ -3,214 +3,490 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blogs Admin</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      :root {
-        color-scheme: dark;
+    <title>NUV ACM - Blogs Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'aleo': ['Aleo', 'serif'],
+              'mega-bold': ['Arial Black', 'Arial', 'sans-serif'],
+            },
+          }
+        }
       }
+    </script>
+    <script src="https://unpkg.com/framer-motion@11.0.3/dist/framer-motion.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Global input styling for black text */
+      input, textarea, select {
+        color: #000000 !important;
+      }
+      input::placeholder, textarea::placeholder, select::placeholder {
+        color: #6b7280 !important;
+      }
+
+      :root {
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #111111;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-hover: rgba(255, 255, 255, 0.06);
+        --red-primary: #ef4444;
+        --red-secondary: #dc2626;
+        --red-glow: rgba(239, 68, 68, 0.4);
+        --text-primary: #ffffff;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --error: #ef4444;
+      }
+
       * {
         box-sizing: border-box;
       }
+
       body {
-        margin: 0;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.05), transparent 25%),
-          radial-gradient(circle at 80% 0%, rgba(248, 113, 113, 0.06), transparent 22%),
-          #0b0b0f;
-        color: #e5e7eb;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .admin-bg {
+        background:
+          radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.08), transparent 35%),
+          radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.06), transparent 35%),
+          radial-gradient(circle at 40% 80%, rgba(239, 68, 68, 0.04), transparent 35%),
+          linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
         min-height: 100vh;
-        padding: 24px;
+        position: relative;
+        overflow-x: hidden;
       }
-      .shell {
-        max-width: 1200px;
-        margin: 0 auto;
+
+      .admin-bg::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.03), transparent 40%),
+          radial-gradient(circle at 70% 70%, rgba(220, 38, 38, 0.02), transparent 40%);
+        pointer-events: none;
+        z-index: 0;
       }
-      .card {
-        background: rgba(17, 17, 23, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 16px;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-        padding: 20px;
-        backdrop-filter: blur(10px);
+
+      .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.12),
+          0 2px 8px rgba(0, 0, 0, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-      .header {
-        margin-bottom: 16px;
+
+      .glass-card:hover {
+        background: var(--glass-hover);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px);
+        box-shadow:
+          0 12px 40px rgba(0, 0, 0, 0.15),
+          0 4px 12px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
       }
-      h1 {
-        margin: 0 0 6px 0;
-        font-size: 28px;
-        color: #f8fafc;
+
+      .red-gradient {
+        background: linear-gradient(135deg, var(--red-primary), var(--red-secondary));
+        position: relative;
+        overflow: hidden;
       }
-      .sub {
-        margin: 0;
-        color: #9ca3af;
-      }
-      form {
-        display: grid;
-        gap: 12px;
-      }
-      label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 6px;
-        color: #e5e7eb;
-      }
-      input,
-      textarea,
-      select {
+
+      .red-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
         width: 100%;
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.03);
-        color: #f8fafc;
-        font-size: 14px;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
       }
-      textarea {
-        min-height: 110px;
-        resize: vertical;
+
+      .red-gradient:hover::before {
+        left: 100%;
       }
-      .row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 12px;
+
+      .red-shadow {
+        box-shadow:
+          0 10px 30px var(--red-glow),
+          0 4px 12px rgba(239, 68, 68, 0.2);
       }
-      button {
-        padding: 12px 16px;
+
+      .input-field {
+        background: var(--glass-bg);
+        border: 2px solid var(--glass-border);
+        color: #000000;
         border-radius: 12px;
-        border: none;
-        font-weight: 700;
-        cursor: pointer;
-        transition: transform 0.1s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 14px;
+        font-weight: 400;
       }
-      .primary {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.35);
+
+      .input-field:focus {
+        border-color: var(--red-primary);
+        box-shadow:
+          0 0 0 3px rgba(239, 68, 68, 0.1),
+          0 4px 12px rgba(239, 68, 68, 0.15);
+        outline: none;
+        background: var(--glass-hover);
       }
-      .ghost {
-        background: rgba(255, 255, 255, 0.05);
-        color: #e5e7eb;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+
+      .input-field::placeholder {
+        color: var(--text-muted);
+        font-weight: 400;
       }
-      button:hover {
-        transform: translateY(-1px);
-        opacity: 0.95;
+
+      .blog-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(15px) saturate(180%);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
       }
-      .list {
-        margin-top: 18px;
-        display: grid;
-        gap: 10px;
+
+      .blog-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--red-primary), var(--red-secondary));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
       }
-      .item {
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 14px;
-        padding: 14px;
-        background: rgba(15, 15, 20, 0.8);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+
+      .blog-card:hover::before {
+        transform: scaleX(1);
       }
-      .item-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
+
+      .blog-card:hover {
+        background: var(--glass-hover);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: translateY(-4px);
+        box-shadow:
+          0 20px 40px rgba(0, 0, 0, 0.15),
+          0 8px 16px rgba(239, 68, 68, 0.1);
       }
-      .tag {
-        padding: 4px 10px;
-        border-radius: 999px;
-        background: rgba(239, 68, 68, 0.12);
+
+      .tag-badge {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15));
         border: 1px solid rgba(239, 68, 68, 0.3);
         color: #fecdd3;
-        font-weight: 700;
-        font-size: 12px;
+        backdrop-filter: blur(10px);
+        font-weight: 500;
+        letter-spacing: 0.025em;
       }
-      .muted {
-        color: #9ca3af;
-        font-size: 13px;
+
+      .status-success {
+        color: var(--success);
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.2);
       }
-      .actions {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+
+      .status-error {
+        color: var(--error);
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
       }
-      .status {
-        margin-top: 10px;
-        font-size: 14px;
+
+      .status-info {
+        color: var(--text-secondary);
+        background: rgba(161, 161, 170, 0.1);
+        border: 1px solid rgba(161, 161, 170, 0.2);
       }
-      @media (max-width: 600px) {
-        body {
-          padding: 16px;
+
+      .fade-in {
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      .slide-up {
+        animation: slideUp 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
-        .item-head {
-          flex-direction: column;
-          align-items: flex-start;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
+
+      .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-left: 2px solid var(--red-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .pulse-red {
+        animation: pulseRed 2s ease-in-out infinite;
+      }
+
+      @keyframes pulseRed {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      }
+
+      /* Enhanced scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(239, 68, 68, 0.3);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(239, 68, 68, 0.5);
       }
     </style>
   </head>
-  <body>
-    <div className="shell">
-      <div className="card header">
-        <h1>Blogs Admin</h1>
-        <p className="sub">
-          Add or delete blog posts.
-        </p>
-      </div>
-
-      <div className="card">
-        <form id="blog-form">
-          <div>
-            <label for="title">Title *</label>
-            <input id="title" name="title" placeholder="Post title" required />
+  <body class="bg-gray-50 min-h-screen">
+    <!-- Clean Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-4">
+            <img src="/public/nuvLogo.png" alt="NUV ACM" class="h-8 w-auto">
+            <h1 class="text-xl font-semibold text-gray-900">NUV ACM Admin</h1>
           </div>
-          <div className="row">
-            <div>
-              <label for="tag">Tag</label>
-              <input id="tag" name="tag" placeholder="Category / Tag (e.g., Dev Notes)" />
-            </div>
-            <div>
-              <label for="date">Date</label>
-              <input id="date" name="date" placeholder="2025-02-07" />
-            </div>
-            <div>
-              <label for="readTime">Read Time</label>
-              <input id="readTime" name="readTime" placeholder="5 min read" />
-            </div>
-          </div>
-          <div>
-            <label for="excerpt">Excerpt *</label>
-            <textarea id="excerpt" name="excerpt" placeholder="Short summary" required></textarea>
-          </div>
-          <div>
-            <label for="image">Hero Image</label>
-            <input type="file" id="image" name="image" accept="image/*" />
-            <div id="image-preview" style="margin-top: 8px;"></div>
-          </div>
-          <div>
-            <label for="content">Long Content (optional)</label>
-            <textarea id="content" name="content" placeholder="Optional rich text / markdown"></textarea>
-          </div>
-          <button type="submit" className="primary" id="save-btn">Add Blog</button>
-          <div id="status" className="status"></div>
-        </form>
-      </div>
-
-      <div className="card" style="margin-top: 18px">
-        <div className="item-head" style="margin-bottom: 10px">
-          <h2 style="margin: 0; font-size: 20px">Existing Blogs</h2>
-          <button id="refresh" className="ghost" type="button">Refresh</button>
+          <nav class="flex space-x-6">
+            <a href="/admin" class="text-gray-600 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors">Events</a>
+            <a href="/admin/blogs" class="text-red-600 border-b-2 border-red-600 px-3 py-2 text-sm font-medium">Blogs</a>
+            <button onclick="logout()" class="text-gray-600 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors">Logout</button>
+          </nav>
         </div>
-        <div id="blog-list" className="list"></div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Blog Management</h1>
+        <p class="text-gray-600">Create and manage blog posts for NUV ACM Student Chapter</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Create Blog Form -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center space-x-3 mb-6">
+              <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+              </div>
+              <h2 class="text-lg font-semibold text-gray-900">New Blog Post</h2>
+            </div>
+
+            <form id="blog-form" class="space-y-4">
+              <div>
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  placeholder="Enter blog title"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                />
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="tag" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <input
+                    id="tag"
+                    name="tag"
+                    type="text"
+                    placeholder="Tech, Events..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label for="readTime" class="block text-sm font-medium text-gray-700 mb-1">Read Time</label>
+                  <input
+                    id="readTime"
+                    name="readTime"
+                    type="text"
+                    placeholder="5 min read"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Publish Date</label>
+                <input
+                  id="date"
+                  name="date"
+                  type="date"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label for="excerpt" class="block text-sm font-medium text-gray-700 mb-1">Summary *</label>
+                <textarea
+                  id="excerpt"
+                  name="excerpt"
+                  rows="3"
+                  placeholder="Brief description of the blog post"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
+                ></textarea>
+              </div>
+
+              <div>
+                <label for="image" class="block text-sm font-medium text-gray-700 mb-1">Featured Image</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-red-400 transition-colors">
+                  <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                    class="hidden"
+                  />
+                  <div id="image-preview" class="mb-3">
+                    <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-sm text-gray-500">Click to upload image</p>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="document.getElementById('image').click()"
+                    class="text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
+                    Choose file
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Full Content</label>
+                <textarea
+                  id="content"
+                  name="content"
+                  rows="6"
+                  placeholder="Write your blog content here..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                id="save-btn"
+                class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Publish Blog Post</span>
+              </button>
+
+              <div id="status" class="text-sm text-center"></div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Blog Posts List -->
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                  </div>
+                  <h2 class="text-lg font-semibold text-gray-900">Published Posts</h2>
+                </div>
+                <button
+                  id="refresh"
+                  class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <div id="blog-list" class="divide-y divide-gray-200">
+              <!-- Blog posts will be loaded here -->
+            </div>
+
+            <div id="empty-state" class="hidden p-12 text-center">
+              <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <h3 class="text-lg font-medium text-gray-900 mb-1">No blog posts yet</h3>
+              <p class="text-gray-500">Create your first blog post using the form on the left.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <script src="/admin-assets/blog-admin.js?v=2" defer></script>
+    <!-- Authentication Check -->
+    <script>
+      // Simple authentication check - just verify token exists
+      const token = localStorage.getItem('admin_token');
+      if (!token) {
+        window.location.href = '/login';
+      }
+
+      // Add logout functionality
+      function logout() {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/login';
+      }
+    </script>
+
+    <script src="/admin-assets/blog-admin.js?v=3" defer></script>
   </body>
 </html>
-

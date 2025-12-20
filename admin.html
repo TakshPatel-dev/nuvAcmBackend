@@ -3,203 +3,484 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NUV ACM Events Admin</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        --bg: #0b0b0f;
-        --card: #14141b;
-        --accent: #dc2626;
-        --muted: #9ca3af;
-      }
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        background: radial-gradient(circle at 20% 20%, rgba(220, 38, 38, 0.08), transparent 35%),
-          radial-gradient(circle at 80% 0%, rgba(220, 38, 38, 0.12), transparent 30%),
-          var(--bg);
-        color: #fff;
-        min-height: 100vh;
-      }
-      .shell {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 24px 16px 48px;
-      }
-      h1 {
-        margin: 0 0 12px;
-      }
-      p {
-        color: var(--muted);
-        margin: 0 0 18px;
-      }
-      .card {
-        background: var(--card);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-      }
-      .card + .card {
-        margin-top: 18px;
-      }
-      label {
-        display: block;
-        margin: 12px 0 6px;
-        font-weight: 600;
-      }
-      input,
-      textarea,
-      select {
-        width: 100%;
-        background: #0f0f16;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 10px;
-        padding: 10px 12px;
-        color: #fff;
-        font-size: 14px;
-      }
-      textarea {
-        min-height: 110px;
-        resize: vertical;
-      }
-      .row {
-        display: grid;
-        gap: 12px;
-      }
-      @media (min-width: 720px) {
-        .row.two {
-          grid-template-columns: 1fr 1fr;
+    <title>NUV ACM - Admin Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'aleo': ['Aleo', 'serif'],
+              'mega-bold': ['Arial Black', 'Arial', 'sans-serif'],
+            },
+          }
         }
       }
-      button {
-        background: linear-gradient(135deg, #f43f5e, #dc2626);
-        color: #fff;
-        border: none;
+    </script>
+    <script src="https://unpkg.com/framer-motion@11.0.3/dist/framer-motion.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      /* Global input styling for black text */
+      input, textarea, select {
+        color: #000000 !important;
+      }
+      input::placeholder, textarea::placeholder, select::placeholder {
+        color: #6b7280 !important;
+      }
+
+      :root {
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #111111;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-hover: rgba(255, 255, 255, 0.06);
+        --red-primary: #ef4444;
+        --red-secondary: #dc2626;
+        --red-glow: rgba(239, 68, 68, 0.4);
+        --text-primary: #ffffff;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --error: #ef4444;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .admin-bg {
+        background:
+          radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.08), transparent 35%),
+          radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.06), transparent 35%),
+          radial-gradient(circle at 40% 80%, rgba(239, 68, 68, 0.04), transparent 35%),
+          linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .admin-bg::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.03), transparent 40%),
+          radial-gradient(circle at 70% 70%, rgba(220, 38, 38, 0.02), transparent 40%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid var(--glass-border);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.12),
+          0 2px 8px rgba(0, 0, 0, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .glass-card:hover {
+        background: var(--glass-hover);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: translateY(-2px);
+        box-shadow:
+          0 12px 40px rgba(0, 0, 0, 0.15),
+          0 4px 12px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      }
+
+      .red-gradient {
+        background: linear-gradient(135deg, var(--red-primary), var(--red-secondary));
+        position: relative;
+        overflow: hidden;
+      }
+
+      .red-gradient::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+      }
+
+      .red-gradient:hover::before {
+        left: 100%;
+      }
+
+      .red-shadow {
+        box-shadow:
+          0 10px 30px var(--red-glow),
+          0 4px 12px rgba(239, 68, 68, 0.2);
+      }
+
+      .input-field {
+        background: var(--glass-bg);
+        border: 2px solid var(--glass-border);
+        color: #000000;
         border-radius: 12px;
-        padding: 12px 18px;
-        font-weight: 700;
-        cursor: pointer;
-        margin-top: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 14px;
+        font-weight: 400;
       }
-      button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+
+      .input-field:focus {
+        border-color: var(--red-primary);
+        box-shadow:
+          0 0 0 3px rgba(239, 68, 68, 0.1),
+          0 4px 12px rgba(239, 68, 68, 0.15);
+        outline: none;
+        background: var(--glass-hover);
       }
-      .btn-secondary {
-        background: #374151;
+
+      .input-field::placeholder {
+        color: var(--text-muted);
+        font-weight: 400;
       }
-      .events {
-        margin-top: 28px;
-        display: grid;
-        gap: 14px;
+
+      .event-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(15px) saturate(180%);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
       }
-      .event-item {
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 12px;
-        background: #0f0f16;
-        display: grid;
-        gap: 6px;
+
+      .event-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--red-primary), var(--red-secondary));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
       }
-      .event-head {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        align-items: center;
+
+      .event-card:hover::before {
+        transform: scaleX(1);
       }
-      .muted {
-        color: var(--muted);
-        font-size: 13px;
+
+      .event-card:hover {
+        background: var(--glass-hover);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: translateY(-4px);
+        box-shadow:
+          0 20px 40px rgba(0, 0, 0, 0.15),
+          0 8px 16px rgba(239, 68, 68, 0.1);
       }
-      .danger {
-        background: #ef4444;
+
+      .status-success {
+        color: var(--success);
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.2);
       }
-      small {
-        color: var(--muted);
+
+      .status-error {
+        color: var(--error);
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
       }
-      .preview {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 8px;
+
+      .status-info {
+        color: var(--text-secondary);
+        background: rgba(161, 161, 170, 0.1);
+        border: 1px solid rgba(161, 161, 170, 0.2);
       }
-      .preview img {
-        width: 96px;
-        height: 96px;
-        object-fit: cover;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+
+      .fade-in {
+        animation: fadeIn 0.6s ease-out;
       }
-      .err {
-        color: #f87171;
-        font-size: 13px;
+
+      .slide-up {
+        animation: slideUp 0.5s ease-out;
       }
-      .ok {
-        color: #34d399;
-        font-size: 13px;
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-left: 2px solid var(--red-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .pulse-red {
+        animation: pulseRed 2s ease-in-out infinite;
+      }
+
+      @keyframes pulseRed {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      }
+
+      /* Enhanced scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(239, 68, 68, 0.3);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(239, 68, 68, 0.5);
       }
     </style>
   </head>
-  <body>
-    <div class="shell">
-      <h1>Events Admin</h1>
-      <p>Add or delete events.Aim for ~400-600px width for best card fit.</p>
-
-      <div class="card">
-        <form id="event-form">
-          <label>Heading *</label>
-          <input id="heading" required />
-
-          <label>Description *</label>
-          <textarea id="description" required placeholder="Plain text; line breaks kept."></textarea>
-
-          <div class="row two">
-            <div>
-              <label>Date (YYYY-MM-DD)</label>
-              <input id="date" placeholder="2025-02-07" />
-            </div>
-            <div>
-              <label>Reverse Layout?</label>
-              <select id="reverse">
-                <option value="false">No</option>
-                <option value="true">Yes</option>
-              </select>
-            </div>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- Clean Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-4">
+            <img src="/public/nuvLogo.png" alt="NUV ACM" class="h-8 w-auto">
+            <h1 class="text-xl font-semibold text-gray-900">NUV ACM Admin</h1>
           </div>
+          <nav class="flex space-x-6">
+            <a href="/admin" class="text-red-600 border-b-2 border-red-600 px-3 py-2 text-sm font-medium">Events</a>
+            <a href="/admin/blogs" class="text-gray-600 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors">Blogs</a>
+            <button onclick="logout()" class="text-gray-600 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors">Logout</button>
+          </nav>
+        </div>
+      </div>
+    </header>
 
-          <div class="row two">
-            <div>
-              <label>Form Link</label>
-              <input id="formLink" placeholder="https://..." />
-            </div>
-            <div>
-              <label>QR Link</label>
-              <input id="qrLink" placeholder="https://..." />
-            </div>
-          </div>
-
-          <label>Images (multiple allowed)</label>
-          <input id="images" type="file" multiple accept="image/*" />
-          <small>Recommended: crop/rescale near 400-600px wide to keep cards uniform.</small>
-          <div class="preview" id="preview"></div>
-
-          <button type="submit">Add Event</button>
-          <span id="status" class="muted" style="margin-left:8px;"></span>
-        </form>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Event Management</h1>
+        <p class="text-gray-600">Create and manage events for NUV ACM Student Chapter</p>
       </div>
 
-      <div class="card">
-        <div class="event-head" style="margin-bottom:10px;">
-          <div>
-            <strong>Existing Events</strong>
-            <div class="muted">Click delete to remove; newly added items appear here.</div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Create Event Form -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center space-x-3 mb-6">
+              <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <h2 class="text-lg font-semibold text-gray-900">New Event</h2>
+            </div>
+
+            <form id="event-form" class="space-y-4">
+              <div>
+                <label for="heading" class="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
+                <input
+                  id="heading"
+                  name="heading"
+                  type="text"
+                  placeholder="Enter event title"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows="4"
+                  placeholder="Event description"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <input
+                    id="date"
+                    name="date"
+                    type="text"
+                    placeholder="2025-02-07"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label for="reverse" class="block text-sm font-medium text-gray-700 mb-1">Layout</label>
+                  <select
+                    id="reverse"
+                    name="reverse"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  >
+                    <option value="false">Normal</option>
+                    <option value="true">Reverse</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label for="formLink" class="block text-sm font-medium text-gray-700 mb-1">Registration Link</label>
+                <input
+                  id="formLink"
+                  name="formLink"
+                  type="url"
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label for="qrLink" class="block text-sm font-medium text-gray-700 mb-1">QR Code Link</label>
+                <input
+                  id="qrLink"
+                  name="qrLink"
+                  type="url"
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label for="images" class="block text-sm font-medium text-gray-700 mb-1">Event Images</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-red-400 transition-colors">
+                  <input
+                    type="file"
+                    id="images"
+                    name="images"
+                    multiple
+                    accept="image/*"
+                    class="hidden"
+                  />
+                  <div id="preview" class="mb-3">
+                    <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <p class="text-sm text-gray-500">Click to upload images</p>
+                  </div>
+                  <button
+                    type="button"
+                    onclick="document.getElementById('images').click()"
+                    class="text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
+                    Choose files
+                  </button>
+                </div>
+                <p class="text-gray-500 text-xs mt-1">Upload multiple images (recommended: 400-600px wide)</p>
+              </div>
+
+              <button
+                type="submit"
+                class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>Create Event</span>
+              </button>
+
+              <div id="status" class="text-sm text-center"></div>
+            </form>
           </div>
-          <button id="refresh" class="btn-secondary" type="button">Refresh</button>
         </div>
-        <div class="events" id="events"></div>
+
+        <!-- Events List -->
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                  </div>
+                  <h2 class="text-lg font-semibold text-gray-900">Published Events</h2>
+                </div>
+                <button
+                  id="refresh"
+                  class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <div id="events" class="divide-y divide-gray-200">
+              <!-- Events will be loaded here -->
+            </div>
+
+            <div id="empty-state" class="hidden p-12 text-center">
+              <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <h3 class="text-lg font-medium text-gray-900 mb-1">No events yet</h3>
+              <p class="text-gray-500">Create your first event using the form on the left.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Authentication Check -->
+    <script>
+      // Simple authentication check - just verify token exists
+      const token = localStorage.getItem('admin_token');
+      if (!token) {
+        window.location.href = '/login';
+      }
+
+      // Add logout functionality
+      function logout() {
+        localStorage.removeItem('admin_token');
+        window.location.href = '/login';
+      }
+    </script>
 
     <script src="/admin-assets/admin.js"></script>
   </body>
