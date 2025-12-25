@@ -14,6 +14,10 @@ const preview = document.getElementById('preview');
 const refreshBtn = document.getElementById('refresh');
 const imagesInput = document.getElementById('images');
 
+// Edit mode variables
+let isEditMode = false;
+let editingEventId = null;
+
 const setStatus = (msg, type = 'info') => {
   const el = statusEl();
   if (!el) return;
@@ -108,6 +112,16 @@ function renderEvents(list) {
         </div>
         <div class="flex items-center space-x-2 ml-4">
           <button
+            class="inline-flex items-center px-3 py-1.5 border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-medium transition-colors duration-200"
+            data-id="${evt.id}"
+            data-action="edit"
+          >
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Edit
+          </button>
+          <button
             class="inline-flex items-center px-3 py-1.5 border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors duration-200"
             data-id="${evt.id}"
             data-action="delete"
@@ -120,9 +134,13 @@ function renderEvents(list) {
         </div>
       </div>
     `;
-    const btn = div.querySelector('[data-action="delete"]');
-    if (btn && evt.id) {
-      btn.onclick = () => deleteEvent(evt.id);
+    const editBtn = div.querySelector('[data-action="edit"]');
+    const deleteBtn = div.querySelector('[data-action="delete"]');
+    if (editBtn && evt.id) {
+      editBtn.onclick = () => editEvent(evt);
+    }
+    if (deleteBtn && evt.id) {
+      deleteBtn.onclick = () => deleteEvent(evt.id);
     }
     container.appendChild(div);
   });
@@ -143,16 +161,169 @@ async function deleteEvent(id) {
   }
 }
 
+function editEvent(event) {
+  // Set edit mode
+  isEditMode = true;
+  editingEventId = event.id;
+
+  // Populate form with existing data
+  document.getElementById('heading').value = event.Heading || '';
+  document.getElementById('description').value = event.Description || '';
+  document.getElementById('date').value = event.date || '';
+  document.getElementById('formLink').value = event.formLink || '';
+  document.getElementById('qrLink').value = event.qrLink || '';
+  document.getElementById('reverse').value = event.reverse ? 'true' : 'false';
+
+  // Update form UI
+  const formTitle = document.querySelector('h2.text-lg.font-semibold');
+  const submitBtn = document.querySelector('button[type="submit"]');
+
+  if (formTitle) formTitle.textContent = 'Edit Event';
+  if (submitBtn) {
+    submitBtn.innerHTML = `
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+      </svg>
+      <span>Update Event</span>
+    `;
+  }
+
+  // Show existing images in preview
+  if (event.images && event.images.length > 0) {
+    preview.innerHTML = '';
+    event.images.forEach((imageUrl, index) => {
+      const container = document.createElement('div');
+      container.style.position = 'relative';
+      container.style.display = 'inline-block';
+      container.style.margin = '4px';
+
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.style.maxWidth = '150px';
+      img.style.maxHeight = '100px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '8px';
+      img.style.border = '2px solid #e5e7eb';
+      img.title = `Current image ${index + 1}`;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.innerHTML = '×';
+      removeBtn.style.position = 'absolute';
+      removeBtn.style.top = '-5px';
+      removeBtn.style.right = '-5px';
+      removeBtn.style.background = '#ef4444';
+      removeBtn.style.color = 'white';
+      removeBtn.style.border = 'none';
+      removeBtn.style.borderRadius = '50%';
+      removeBtn.style.width = '20px';
+      removeBtn.style.height = '20px';
+      removeBtn.style.fontSize = '14px';
+      removeBtn.style.fontWeight = 'bold';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.style.display = 'flex';
+      removeBtn.style.alignItems = 'center';
+      removeBtn.style.justifyContent = 'center';
+      removeBtn.title = 'Remove this image';
+      removeBtn.onclick = () => {
+        container.remove();
+        // Update the images array to mark this image for removal
+        event.images[index] = null; // Mark for removal
+      };
+
+      container.appendChild(img);
+      container.appendChild(removeBtn);
+      preview.appendChild(container);
+    });
+
+    // Add note about existing images
+    const note = document.createElement('p');
+    note.textContent = 'Select new images above to add more, or click × to remove existing images.';
+    note.style.fontSize = '12px';
+    note.style.color = '#6b7280';
+    note.style.marginTop = '8px';
+    preview.appendChild(note);
+  } else {
+    preview.innerHTML = '';
+  }
+
+  imagesInput.value = '';
+
+  // Scroll to form
+  document.querySelector('.bg-white.rounded-xl').scrollIntoView({ behavior: 'smooth' });
+}
+
+function resetForm() {
+  isEditMode = false;
+  editingEventId = null;
+
+  // Reset form UI
+  const formTitle = document.querySelector('h2.text-lg.font-semibold');
+  const submitBtn = document.querySelector('button[type="submit"]');
+
+  if (formTitle) formTitle.textContent = 'New Event';
+  if (submitBtn) {
+    submitBtn.innerHTML = `
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      <span>Create Event</span>
+    `;
+  }
+}
+
 document.getElementById('event-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   statusEl.textContent = 'Uploading...';
   statusEl.className = 'muted';
   try {
-    // Upload images directly to ImageBB from the browser
-    const files = Array.from(imagesInput.files || []);
-    console.log('Uploading', files.length, 'images to ImageBB...');
-    const imageUrls = await uploadImagesClient(files);
-    console.log('Uploaded image URLs:', imageUrls);
+    // Upload images directly to ImageBB from the browser (only for new uploads)
+    let imageUrls = [];
+    if (imagesInput.files && imagesInput.files.length > 0) {
+      const files = Array.from(imagesInput.files || []);
+      console.log('Uploading', files.length, 'images to ImageBB...');
+
+      // Show loading spinner in preview area
+      preview.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; padding: 20px; color: #6b7280;">
+          <div style="width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+          <p style="font-size: 14px; margin: 0;">Uploading ${files.length} image${files.length > 1 ? 's' : ''}...</p>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+
+      imageUrls = await uploadImagesClient(files);
+      console.log('Uploaded image URLs:', imageUrls);
+
+      // Show uploaded images in preview
+      if (imageUrls.length > 0) {
+        preview.innerHTML = '';
+        imageUrls.forEach((imageUrl, index) => {
+          const img = document.createElement('img');
+          img.src = imageUrl;
+          img.style.maxWidth = '150px';
+          img.style.maxHeight = '100px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '8px';
+          img.style.margin = '4px';
+          img.style.border = '2px solid #10b981';
+          img.title = `Uploaded image ${index + 1}`;
+          preview.appendChild(img);
+        });
+
+        const note = document.createElement('p');
+        note.textContent = 'Images uploaded successfully!';
+        note.style.fontSize = '12px';
+        note.style.color = '#10b981';
+        note.style.marginTop = '8px';
+        note.style.fontWeight = '500';
+        preview.appendChild(note);
+      }
+    }
 
     const payload = {
       Heading: document.getElementById('heading').value.trim(),
@@ -161,26 +332,46 @@ document.getElementById('event-form').addEventListener('submit', async (e) => {
       formLink: document.getElementById('formLink').value.trim(),
       qrLink: document.getElementById('qrLink').value.trim(),
       reverse: document.getElementById('reverse').value === 'true',
-      imageUrls,
     };
-    console.log('Sending payload to backend:', { ...payload, imageUrls });
 
-    const res = await fetch(API + '/events', {
-      method: 'POST',
+    // Handle image updates for editing
+    if (isEditMode) {
+      // For editing, combine remaining existing images with new uploads
+      const remainingImages = (event.images || []).filter(img => img !== null); // Remove marked for deletion
+      payload.imageUrls = [...remainingImages, ...imageUrls];
+    } else {
+      // For new events, just use uploaded images
+      if (imageUrls.length > 0) {
+        payload.imageUrls = imageUrls;
+      }
+    }
+
+    console.log('Sending payload to backend:', payload);
+
+    const method = isEditMode ? 'PUT' : 'POST';
+    const url = isEditMode ? `${API}/events/${editingEventId}` : `${API}/events`;
+
+    const res = await fetch(url, {
+      method: method,
       headers: {
         'Content-Type': 'application/json',
         ...getAuthHeaders()
       },
       body: JSON.stringify(payload),
     });
+
     if (!res.ok) {
       const txt = await res.text();
       throw new Error(txt || 'Error saving');
     }
-    statusEl.textContent = 'Saved';
+
+    const successMsg = isEditMode ? 'Updated' : 'Saved';
+    statusEl.textContent = successMsg;
     statusEl.className = 'ok';
+
     e.target.reset();
     preview.innerHTML = '';
+    resetForm(); // Reset edit mode
     fetchEvents();
   } catch (err) {
     console.error(err);

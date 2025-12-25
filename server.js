@@ -273,8 +273,19 @@ app.post('/events', authenticateToken, upload.array('images', 10), async (req, r
 
 app.put('/events/:id', authenticateToken, async (req, res) => {
   try {
+    console.log('PUT /events/:id - ID:', req.params.id);
+    console.log('PUT /events/:id - Request body:', req.body);
+    console.log('PUT /events/:id - Images field:', req.body.imageUrls);
+
     const updated = await EventModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ error: 'Not found' });
+    if (!updated) {
+      console.log('PUT /events/:id - Event not found');
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    console.log('PUT /events/:id - Updated event images:', updated.images);
+    console.log('PUT /events/:id - Full updated event:', updated.toObject());
+
     res.json(formatEvent(updated));
   } catch (e) {
     console.error('Failed to update event:', e);
@@ -330,8 +341,19 @@ app.post('/blogs', authenticateToken, async (req, res) => {
 
 app.put('/blogs/:id', authenticateToken, async (req, res) => {
   try {
+    console.log('PUT /blogs/:id - ID:', req.params.id);
+    console.log('PUT /blogs/:id - Request body:', req.body);
+    console.log('PUT /blogs/:id - Image field:', req.body.image);
+
     const updated = await BlogModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ error: 'Not found' });
+    if (!updated) {
+      console.log('PUT /blogs/:id - Blog not found');
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    console.log('PUT /blogs/:id - Updated blog image:', updated.image);
+    console.log('PUT /blogs/:id - Full updated blog:', updated.toObject());
+
     res.json({ ...updated.toObject(), id: updated._id.toString() });
   } catch (e) {
     console.error('Failed to update blog:', e);
