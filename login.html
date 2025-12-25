@@ -120,8 +120,8 @@
     </div>
 
     <script>
-      // API endpoint - adjust this if backend is on different port
-      const API = 'http://localhost:4000';
+      // API endpoint - uses current domain for Vercel deployment
+      const API = window.location.origin;
       const loginForm = document.getElementById('login-form');
       const loginBtn = document.getElementById('login-btn');
       const loginSpinner = document.getElementById('login-spinner');
