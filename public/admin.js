@@ -1,5 +1,5 @@
-// API endpoint - adjust this if backend is on different port
-const API = 'http://localhost:4000';
+// API endpoint - uses current domain for Vercel deployment
+const API = window.location.origin;
 
 // Get auth token from localStorage
 const getAuthToken = () => localStorage.getItem('admin_token');
