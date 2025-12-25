@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 4000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://admin:ACMadmin@cluster0.gzl0kaw.mongodb.net/?appName=Cluster0';
 const MONGODB_DB = process.env.MONGODB_DB || 'nuvacm';
-const IMGHIPPO_API_KEY = process.env.IMGHIPPO_API_KEY || '0e5829420afdd52bc447cf220d3b95e0';
+const IMGBB_API_KEY = process.env.IMGBB_API_KEY || '05ed47146407ec4673e86cf2108594d8';
 const JWT_SECRET = process.env.JWT_SECRET || 'nuvacm-admin-secret-key-2025';
 
 if (!MONGODB_URI) {
@@ -102,36 +102,34 @@ function fileToBlob(file) {
   return new Blob([file.buffer], { type: file.mimetype || 'application/octet-stream' });
 }
 
-async function uploadToImgHippoFromBlob(blob, title = 'upload') {
+async function uploadToImgBBFromBlob(blob, title = 'upload') {
   if (!blob) throw new Error('Invalid image data');
-  const form = new FormData();
-  form.append('api_key', IMGHIPPO_API_KEY);
-  form.append('file', blob, title);
-  if (title) form.append('title', title);
 
-  const res = await fetch('https://api.imghippo.com/v1/upload', {
+  // Convert blob to base64 for ImageBB API
+  const arrayBuffer = await blob.arrayBuffer();
+  const base64 = Buffer.from(arrayBuffer).toString('base64');
+
+  const form = new FormData();
+  form.append('image', base64);
+
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
     method: 'POST',
     body: form,
-    // Avoid Cloudflare challenges by sending a browser-like UA
-    headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36' },
   });
-  const text = await res.text();
-  let json = {};
-  try {
-    json = JSON.parse(text);
-  } catch (_err) {
-    // leave json empty
-  }
+
+  const json = await res.json();
+
   if (!res.ok || !json.success) {
-    console.error('ImgHippo upload failed', {
+    console.error('ImageBB upload failed', {
       status: res.status,
       statusText: res.statusText,
-      body: text?.slice(0, 500),
+      response: json,
     });
-    throw new Error(json.message || text || 'Image upload failed');
+    throw new Error(json.error?.message || 'Image upload failed');
   }
-  // prefer direct_url, fall back to url
-  return json.direct_url || json.url;
+
+  // ImageBB returns the image URL in data.url
+  return json.data.url;
 }
 
 async function uploadFilesArray(files = [], title = 'upload') {
@@ -142,7 +140,7 @@ async function uploadFilesArray(files = [], title = 'upload') {
     if (!file) continue;
     const blob = fileToBlob(file);
     const filename = file?.originalname || `${title}-${i + 1}`;
-    const url = await uploadToImgHippoFromBlob(blob, filename);
+    const url = await uploadToImgBBFromBlob(blob, filename);
     uploads.push(url);
   }
   return uploads;
@@ -246,7 +244,7 @@ app.post('/events', authenticateToken, upload.array('images', 10), async (req, r
       return res.status(400).json({ error: 'Heading and Description are required' });
     }
 
-    // Upload images to ImgHippo (files first, then any pre-hosted URLs)
+    // Upload images to ImageBB (files first, then any pre-hosted URLs)
     const uploadedFiles = await uploadFilesArray(files, Heading || 'event');
     const uploadedStrings = imagesFromBody.filter((u) => typeof u === 'string' && /^https?:\/\//.test(u));
     const uploadedImages = [...uploadedFiles, ...uploadedStrings];

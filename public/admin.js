@@ -148,9 +148,9 @@ document.getElementById('event-form').addEventListener('submit', async (e) => {
   statusEl.textContent = 'Uploading...';
   statusEl.className = 'muted';
   try {
-    // Upload images directly to ImgHippo from the browser to avoid server-side CF blocks
+    // Upload images directly to ImageBB from the browser
     const files = Array.from(imagesInput.files || []);
-    console.log('Uploading', files.length, 'images to ImgHippo...');
+    console.log('Uploading', files.length, 'images to ImageBB...');
     const imageUrls = await uploadImagesClient(files);
     console.log('Uploaded image URLs:', imageUrls);
 
@@ -194,46 +194,56 @@ document.getElementById('event-form').addEventListener('submit', async (e) => {
 refreshBtn.onclick = fetchEvents;
 fetchEvents();
 
-// ImgHippo client upload (browser side to avoid CF challenges)
+// ImageBB client upload (browser side)
 async function uploadImagesClient(files) {
   if (!files.length) return [];
   const uploads = [];
   for (let i = 0; i < files.length; i += 1) {
     const file = files[i];
-    const form = new FormData();
-    form.append('api_key', '0e5829420afdd52bc447cf220d3b95e0');
-    form.append('file', file, file.name || `upload-${i + 1}`);
-    form.append('title', file.name || `upload-${i + 1}`);
 
-    const res = await fetch('https://api.imghippo.com/v1/upload', {
+    // Convert file to base64 for ImageBB API
+    const base64 = await fileToBase64(file);
+
+    const form = new FormData();
+    form.append('image', base64);
+
+    const res = await fetch('https://api.imgbb.com/1/upload?key=05ed47146407ec4673e86cf2108594d8', {
       method: 'POST',
       body: form,
     });
-    const text = await res.text();
-    let json = {};
-    try {
-      json = JSON.parse(text);
-    } catch (err) {
-      console.error('Failed to parse ImgHippo response:', text);
-      throw new Error('Invalid response from image host');
-    }
-    
+
+    const json = await res.json();
+
     if (!res.ok || !json.success) {
-      console.error('ImgHippo upload failed:', {
+      console.error('ImageBB upload failed:', {
         status: res.status,
         statusText: res.statusText,
         response: json,
       });
-      throw new Error(json.message || json.error || 'Image upload failed');
+      throw new Error(json.error?.message || 'Image upload failed');
     }
-    
-    // ImgHippo returns URL in data.url or data.direct_url
-    const imageUrl = json.data?.direct_url || json.data?.url || json.direct_url || json.url;
+
+    // ImageBB returns URL in data.url
+    const imageUrl = json.data?.url;
     if (!imageUrl) {
-      console.error('No URL in ImgHippo response:', json);
+      console.error('No URL in ImageBB response:', json);
       throw new Error('No image URL returned from upload service');
     }
     uploads.push(imageUrl);
   }
   return uploads;
+}
+
+// Helper function to convert file to base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      // Remove the "data:image/jpeg;base64," prefix
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
+  });
 }
