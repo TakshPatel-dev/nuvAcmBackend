@@ -69,6 +69,20 @@ function renderEvents(list) {
   const emptyState = document.getElementById('empty-state');
   if (!container || !emptyState) return;
 
+  // Update stats
+  const totalEventsEl = document.getElementById('total-events');
+  const publishedEventsEl = document.getElementById('published-events');
+  const totalImagesEl = document.getElementById('total-images');
+
+  if (totalEventsEl) totalEventsEl.textContent = list.length;
+  if (publishedEventsEl) publishedEventsEl.textContent = list.length; // All loaded events are published
+
+  // Calculate total images
+  const totalImages = list.reduce((sum, event) => {
+    return sum + (event.images?.length || 0);
+  }, 0);
+  if (totalImagesEl) totalImagesEl.textContent = totalImages;
+
   if (!Array.isArray(list) || !list.length) {
     container.innerHTML = '';
     emptyState.classList.remove('hidden');

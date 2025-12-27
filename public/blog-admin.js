@@ -43,6 +43,27 @@ const renderBlogs = (blogs = []) => {
   const emptyState = document.getElementById('empty-state');
   if (!container || !emptyState) return;
 
+  // Update stats
+  const totalPostsEl = document.getElementById('total-posts');
+  const publishedPostsEl = document.getElementById('published-posts');
+  const avgReadTimeEl = document.getElementById('avg-read-time');
+
+  if (totalPostsEl) totalPostsEl.textContent = blogs.length;
+  if (publishedPostsEl) publishedPostsEl.textContent = blogs.length; // All loaded blogs are published
+
+  // Calculate average read time
+  if (blogs.length > 0) {
+    const totalReadTime = blogs.reduce((sum, blog) => {
+      const readTime = blog.readTime || '0 min';
+      const minutes = parseInt(readTime.replace(/\D/g, '')) || 0;
+      return sum + minutes;
+    }, 0);
+    const avgReadTime = Math.round(totalReadTime / blogs.length);
+    if (avgReadTimeEl) avgReadTimeEl.textContent = `${avgReadTime} min`;
+  } else {
+    if (avgReadTimeEl) avgReadTimeEl.textContent = '0 min';
+  }
+
   if (!blogs.length) {
     container.innerHTML = '';
     emptyState.classList.remove('hidden');
@@ -157,7 +178,7 @@ function editBlog(blog) {
   document.getElementById('date').value = blog.date || '';
   document.getElementById('readTime').value = blog.readTime || '';
   document.getElementById('excerpt').value = blog.excerpt || '';
-  document.getElementById('content').value = blog.content || '';
+  tinymce.get('content').setContent(blog.content || '');
 
   // Update form UI
   const formTitle = document.querySelector('h2.text-lg.font-semibold');
@@ -335,12 +356,19 @@ const handleSubmit = () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
 
-    // cleanup
-    Object.keys(payload).forEach((k) => {
-      if (typeof payload[k] === 'string') payload[k] = payload[k].trim();
-    });
+    // Create payload excluding file inputs (they get serialized as objects)
+    const payload = {};
+    for (const [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        // Skip file inputs, handle them separately
+        continue;
+      }
+      payload[key] = typeof value === 'string' ? value.trim() : value;
+    }
+
+    // Get content from TinyMCE
+    payload.content = tinymce.get('content').getContent();
 
     if (!payload.title || !payload.excerpt) {
       setStatus('Title and excerpt are required', 'error');
@@ -348,17 +376,36 @@ const handleSubmit = () => {
     }
 
     try {
-      // For editing, we want to preserve existing image unless new one is uploaded
+      // Handle image field properly
       let imageUrl = '';
-      if (isEditMode) {
-        // When editing, start with empty string - only set if new image uploaded
-        imageUrl = '';
-      } else {
-        // For new posts, use any existing value from form
-        imageUrl = typeof payload.image === 'string' ? payload.image : '';
+      const imageFile = imageInput?.files?.[0];
+
+      if (imageFile) {
+        // Image file selected - will upload
+        imageUrl = 'pending_upload';
       }
 
-      const imageFile = imageInput?.files?.[0];
+      // For editing mode, handle image updates differently
+      if (isEditMode) {
+        if (imageFile) {
+          // New image uploaded - will be set after upload
+          imageUrl = 'pending_upload';
+        } else if (imageMarkedForRemoval) {
+          // Image marked for removal - set to null
+          payload.image = null;
+          imageMarkedForRemoval = false;
+        } else {
+          // No image changes - remove from payload to preserve existing
+          delete payload.image;
+        }
+      } else {
+        // For new posts
+        if (!imageFile) {
+          // No image - remove from payload
+          delete payload.image;
+        }
+      }
+
       console.log('Image file present?', !!imageFile, imageFile?.name);
       console.log('Existing image URL value:', imageUrl);
 
@@ -433,6 +480,12 @@ const handleSubmit = () => {
           console.log('NEW POST: No image uploaded');
         }
       }
+      // Final cleanup - ensure image field is properly handled
+      if (isEditMode && !imageFile && !imageMarkedForRemoval) {
+        // Editing without image changes - remove image field completely
+        delete payload.image;
+      }
+
       console.log('Final payload image:', payload.image !== undefined ? payload.image : '(preserving existing)');
 
       setStatus('Saving blog post...', 'loading');
@@ -461,6 +514,7 @@ const handleSubmit = () => {
       setStatus(successMsg, 'success');
 
       form.reset();
+      tinymce.get('content').setContent('');
       imagePreview.innerHTML = '';
       resetForm(); // Reset edit mode
       loadBlogs();
@@ -476,6 +530,23 @@ const init = () => {
   if (refreshBtn) refreshBtn.onclick = loadBlogs;
   handleSubmit();
   loadBlogs();
+
+  // Initialize TinyMCE
+  tinymce.init({
+    selector: '#content',
+    height: 400,
+    menubar: false,
+    plugins: [
+      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+      'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+    ],
+    toolbar: 'undo redo | blocks | ' +
+      'bold italic forecolor | alignleft aligncenter ' +
+      'alignright alignjustify | bullist numlist outdent indent | ' +
+      'removeformat | help',
+    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+  });
 };
 
 document.addEventListener('DOMContentLoaded', init);
