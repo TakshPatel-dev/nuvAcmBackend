@@ -307,9 +307,8 @@ app.delete('/events/:id', authenticateToken, async (req, res) => {
 // Blog routes
 app.get('/blogs', async (_req, res) => {
   try {
-    // Use native MongoDB collection to enable allowDiskUse for large sorts
-    const collection = BlogModel.collection;
-    const blogs = await collection.find({}).sort({ createdAt: -1 }).allowDiskUse(true).toArray();
+    // Use Mongoose model for consistency and better error handling
+    const blogs = await BlogModel.find().sort({ createdAt: -1 }).lean();
     res.json(
       blogs.map((b) => {
         const { _id, __v, ...rest } = b;
